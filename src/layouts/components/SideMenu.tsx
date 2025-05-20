@@ -1,8 +1,8 @@
+import { convertRoutesToMenuItems, getRouteList } from '@/routes';
 import { routeConfig } from '@/routes/router';
 import { Menu } from 'antd';
 import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { MenuItem, convertRoutesToMenuItems } from './MenuGenerator';
 
 interface SideMenuProps {}
 
@@ -28,7 +28,9 @@ const SideMenu: React.FC<SideMenuProps> = ({}) => {
     const { pathname } = location;
 
     // 先尝试精确匹配
-    const exactMatch = menuItems.find(item => item?.key === pathname);
+    const exactMatch = getRouteList()?.find(item => item.path === pathname);
+    console.log('exactMatch', exactMatch);
+
     if (exactMatch) return [pathname];
 
     // 如果没有精确匹配，查找父级路径
@@ -48,9 +50,25 @@ const SideMenu: React.FC<SideMenuProps> = ({}) => {
     return [pathname]; // 默认返回当前路径
   };
 
+  // 获取需要展开的父级菜单项
+  const getDefaultOpenKeys = (): string[] => {
+    const { pathname } = location;
+    const pathSegments = pathname.split('/').filter(Boolean);
+    const openKeys: string[] = [];
+
+    let currentPath = '';
+    for (const segment of pathSegments) {
+      currentPath += `/${segment}`;
+      openKeys.push(currentPath);
+    }
+
+    return openKeys;
+  };
+
   return (
     <Menu
       selectedKeys={getSelectedMenuKeys()}
+      defaultOpenKeys={getDefaultOpenKeys()}
       mode="inline"
       items={menuItems}
       onClick={handleMenuClick}

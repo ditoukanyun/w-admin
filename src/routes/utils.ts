@@ -1,72 +1,69 @@
 import { routeConfig } from './router';
 import { IRoute } from './types';
 
-// 获取路由配置的扁平数组，方便查找
+import type { MenuProps } from 'antd';
+import React from 'react';
+
+export type MenuItem = Required<MenuProps>['items'][number];
+
+// 公共递归处理函数
+const traverseRoutes = <T>(
+  routes: IRoute[],
+  parentPath = '',
+  handler: (route: IRoute, fullPath: string, children: T[] | undefined) => T,
+): T[] => {
+  return routes.map(route => {
+    const fullPath = route.index
+      ? parentPath
+      : parentPath
+        ? `${parentPath.replace(/\/$/, '')}/${(route.path || '').replace(/^\//, '')}`
+        : `/${(route.path || '').replace(/^\//, '')}`;
+
+    let children: T[] | undefined;
+    if (route.children) {
+      children = traverseRoutes(route.children, fullPath, handler);
+    }
+
+    return handler(route, fullPath, children);
+  });
+};
+
+// 获取路由扁平数组
 export const getRouteList = (): IRoute[] => {
   const result: IRoute[] = [];
-
-  const flattenRoutes = (routes: IRoute[], parentPath = '') => {
-    routes.forEach(route => {
-      // 构建完整路径
-      const fullPath = route.index
-        ? parentPath
-        : `${parentPath}${route.path?.startsWith('/') ? route.path : `${route.path || ''}`}`;
-
-      // 添加到结果数组
-      result.push({
-        ...route,
-        path: fullPath,
-      });
-
-      // 递归处理子路由
-      if (route.children) {
-        flattenRoutes(route.children, fullPath);
-      }
-    });
-  };
-
-  flattenRoutes(routeConfig);
+  traverseRoutes(routeConfig, '', (route, fullPath, children) => {
+    result.push({ ...route, path: fullPath });
+    return null as any; // 这里只是为了遍历
+  });
   return result;
 };
 
-// 根据路径获取路由信息
-export const getRouteByPath = (path: string): IRoute | undefined => {
-  const routes = getRouteList();
+// 转换为菜单项
+export const convertRoutesToMenuItems = (routes: IRoute[] | undefined): MenuItem[] => {
+  if (!routes) return [];
 
-  return routes.find(route => route.path === path);
-};
-
-// 根据路径获取面包屑数据
-export const getBreadcrumbByPath = (path: string): { title: string; path: string }[] => {
-  const result: { title: string; path: string }[] = [];
-
-  // 首页始终是第一个
-  result.push({ title: '首页', path: '/' });
-
-  if (path === '/') return result;
-
-  // 分割路径
-  const pathSegments = path.split('/').filter(Boolean);
-  let currentPath = '';
-
-  // 逐级查找路由
-  for (let i = 0; i < pathSegments.length; i++) {
-    currentPath += `/${pathSegments[i]}`;
-    const route = getRouteByPath(currentPath);
-
-    if (route && !route.hideInBreadcrumb) {
-      result.push({
-        title: route.name || pathSegments[i],
-        path: currentPath,
-      });
+  const items = traverseRoutes<MenuItem | null>(routes, '', (route, fullPath, children) => {
+    if (!route.name || route.hideInMenu || route.path?.includes(':')) return null;
+    const path = route.index ? '/' : fullPath.startsWith('/') ? fullPath : `/${fullPath}`;
+    const validChildren = children?.filter(Boolean) as MenuItem[] | undefined;
+    if (validChildren && validChildren.length > 0) {
+      return getItem(route.name, path, route.icon, validChildren);
     }
-  }
-
-  return result;
+    return getItem(route.name, path, route.icon);
+  });
+  return items.filter(Boolean) as MenuItem[];
 };
 
-// 获取需要保持状态的路由路径列表
-export const getKeepAliveRoutes = (): string[] => {
-  const routes = getRouteList();
-  return routes.filter(route => route.keepAlive).map(route => route.path as string);
-};
+function getItem(
+  label: React.ReactNode,
+  key: React.Key,
+  icon?: React.ReactNode,
+  children?: MenuItem[],
+): MenuItem {
+  return {
+    key,
+    icon,
+    children,
+    label,
+  } as MenuItem;
+}

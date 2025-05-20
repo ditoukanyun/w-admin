@@ -1,15 +1,9 @@
-import {
-  DesktopOutlined,
-  FileOutlined,
-  HomeOutlined,
-  PieChartOutlined,
-  TeamOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import React from 'react';
+import Login from '@/pages/Login';
+
+import { HomeOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+
 import BaseLayout from '../layouts/BaseLayout';
-import Login from '../pages/Login';
-import { withLazyLoad } from './lazyLoad';
+
 import { IRoute } from './types';
 
 // 路由配置
@@ -20,14 +14,20 @@ export const routeConfig: IRoute[] = [
     children: [
       {
         path: 'home',
-        element: withLazyLoad(() => import('@/pages/Home')),
+        lazy: async () => {
+          const { default: Component } = await import('@/pages/Home');
+          return { Component };
+        },
         name: '首页',
         icon: <HomeOutlined />,
         meta: { title: '首页' },
       },
       {
         path: 'user',
-        element: withLazyLoad(() => import('@/pages/User')),
+        lazy: async () => {
+          const { default: Component } = await import('@/pages/User');
+          return { Component };
+        },
         name: '用户',
         icon: <UserOutlined />,
         keepAlive: true,
@@ -35,39 +35,45 @@ export const routeConfig: IRoute[] = [
         children: [
           {
             path: 'user/:id',
-            element: withLazyLoad(() => import('@/pages/User/Detail')),
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/User/Detail');
+              return { Component };
+            },
             name: '用户详情',
             hideInMenu: true,
             meta: { title: '用户详情', parentPath: '/user' },
-          },
-          {
-            path: 'user/new',
-            element: withLazyLoad(() => import('@/pages/User/Detail')),
-            name: '新增用户',
-            hideInMenu: true,
-            meta: { title: '新增用户', parentPath: '/user' },
           },
         ],
       },
       {
         path: 'test',
-        element: withLazyLoad(() => import('@/pages/Test')),
         name: '测试',
         icon: <TeamOutlined />,
         meta: { title: '测试页面' },
-      },
-      {
-        path: 'test/test_one',
-        element: withLazyLoad(() => import('@/pages/Test/Test_One')),
-        name: '测试1',
-        hideInMenu: true,
-        meta: { title: '测试页面1', parentPath: '/test' },
+        children: [
+          {
+            path: 'testPage',
+            name: '测试',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/Test');
+              return { Component };
+            },
+          },
+          {
+            path: 'test_one',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/Test/Test_One');
+              return { Component };
+            },
+            name: '测试111',
+          },
+        ],
       },
     ],
   },
   {
     path: '/login',
-    element: <Login />,
+    Component: Login,
     name: '登录',
     hideInMenu: true,
     meta: { title: '登录' },

@@ -1,5 +1,18 @@
+import {
+  Button,
+  Card,
+  Checkbox,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Radio,
+  Select,
+  Space,
+  Switch,
+  TimePicker,
+} from 'antd';
 import React, { useState } from 'react';
-import { Button, Card, Form, Input, Radio, Select, Switch, DatePicker, TimePicker, InputNumber, Checkbox, Space } from 'antd';
 import { useNavigate } from 'react-router';
 
 const { Option } = Select;
@@ -53,11 +66,7 @@ const TestOne: React.FC = () => {
           </Select>
         </Form.Item>
         <Form.Item label="树选择器" name="treeSelect">
-          <Select
-            showSearch
-            style={{ width: '100%' }}
-            placeholder="请选择"
-          >
+          <Select showSearch style={{ width: '100%' }} placeholder="请选择">
             <Option value="parent1">父节点1</Option>
             <Option value="parent1-0">子节点1-0</Option>
             <Option value="parent1-1">子节点1-1</Option>
@@ -103,9 +112,7 @@ const TestOne: React.FC = () => {
         <Form.Item label="单选框" name="radio">
           <Radio>单选</Radio>
         </Form.Item>
-        <Form.Item label="多选框" name="checkbox">
-          <Checkbox>多选</Checkbox>
-        </Form.Item>
+
         <Form.Item wrapperCol={{ offset: 4, span: 14 }}>
           <Space>
             <Button type="primary" htmlType="submit">

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Button, theme } from 'antd';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import TabsView from '@/components/TabsView';
+import { Button, theme } from 'antd';
+import React from 'react';
+// import TabsView from '@/components/TabsView';
 
 interface HeaderContentProps {
   collapsed: boolean;
@@ -33,11 +33,9 @@ const HeaderContent: React.FC<HeaderContentProps> = ({ collapsed, toggleCollapse
           height: 40,
         }}
       />
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        <TabsView />
-      </div>
+      <div style={{ flex: 1, overflow: 'hidden' }}>1{/* <TabsView /> */}</div>
     </div>
   );
 };
 
-export default HeaderContent; 
+export default HeaderContent;
